@@ -9,40 +9,32 @@ from entities import *
 
 
 def load_level(level_loaded: Level):
-    tile_x = int(level_loaded.layout.game_w / level_loaded.TILE_X_NUM)
-    tile_y = int(level_loaded.layout.game_h / level_loaded.TILE_Y_NUM)
-    offset_w = int(round((level_loaded.layout.game_w - tile_x * level_loaded.TILE_X_NUM) / 2))
-    offset_h = int(round((level_loaded.layout.game_h - tile_y * level_loaded.TILE_Y_NUM) / 2))
-
-    constants.VELOCITY_MOVEMENT = level_loaded.VELOCITY_MOVEMENT
-    constants.VELOCITY_JUMP = level_loaded.VELOCITY_JUMP
-    constants.VELOCITY_MAX_FALL = level_loaded.VELOCITY_MAX_FALL
-    constants.VELOCITY_FLY = level_loaded.VELOCITY_FLY
-    constants.VELOCITY_FLY_MAX = level_loaded.VELOCITY_FLY_MAX
-    constants.TILE_X = tile_x
-    constants.TILE_Y = tile_y
+    tile_x = level_loaded.TILE_X
+    tile_y = level_loaded.TILE_Y
+    offset_w = level_loaded.offset_w
+    offset_h = level_loaded.offset_h
 
     entities = pygame.sprite.Group()
     platforms = []
     enemies = []
 
     # build the level
-    player_p1 = Player(0, 0, "dummy")
-    player_p2 = Player(0, 0, "dummy")
+    player_p1 = Player(level_loaded, 0, 0, "dummy")
+    player_p2 = Player(level_loaded, 0, 0, "dummy")
     y = offset_h
     for level_row in level_loaded.level:
         x = offset_w
         for level_block in level_row:
             if level_block == "▉" or level_block == "P":
-                e = PlatformBlock(x, y)
+                e = PlatformBlock(level_loaded, x, y)
                 platforms.append(e)
                 entities.add(e)
             if level_block == "╬" or level_block == "E":
-                e = StairsBlock(x, y)
+                e = StairsBlock(level_loaded, x, y)
                 platforms.append(e)
                 entities.add(e)
             if level_block == "-" or level_block == "B":
-                e = BarBlock(x, y)
+                e = BarBlock(level_loaded, x, y)
                 platforms.append(e)
                 entities.add(e)
             if level_block == "_" or level_block == "H":
@@ -50,25 +42,26 @@ def load_level(level_loaded: Level):
                 platforms.append(e)
                 entities.add(e)
             if level_block == "⊟" or level_block == "G":
-                e = GoalBlock(x, y)
+                e = GoalBlock(level_loaded, x, y)
                 platforms.append(e)
                 entities.add(e)
             if level_block == "⊏" or level_block == "L":
-                e = GoalBlockLeft(x, y)
+                e = GoalBlockLeft(level_loaded, x, y)
                 platforms.append(e)
                 entities.add(e)
             if level_block == "⊐" or level_block == "R":
-                e = GoalBlockRight(x, y)
+                e = GoalBlockRight(level_loaded, x, y)
                 platforms.append(e)
                 entities.add(e)
 
             if level_block == "⭐" or level_block == "S":
-                e = StarItem(x, y)
+                e = StarItem(level_loaded, x, y)
                 platforms.append(e)
                 entities.add(e)
 
             if level_block == "T":
                 e = Tritannus(
+                    level_loaded,
                     x, y, "Y",
                     constants.PLAYER_P1_COLOR_BG,
                     constants.IMAGE_P1,
@@ -81,6 +74,7 @@ def load_level(level_loaded: Level):
 
             if level_block == "1" or level_block == "Y":
                 player_p1 = Player(
+                    level_loaded,
                     x, y, "Y",
                     constants.PLAYER_P1_COLOR_BG,
                     constants.IMAGE_P1,
@@ -92,6 +86,7 @@ def load_level(level_loaded: Level):
 
             if level_block == "2" or level_block == "X":
                 player_p2 = Player(
+                    level_loaded,
                     x, y, "X",
                     constants.PLAYER_P2_COLOR_BG, constants.IMAGE_P2,
                     constants.IMAGE_P2_TRANSFORMED,
@@ -181,37 +176,38 @@ class GameLevel:
                     done = True
                     for p in platforms:
                         if isinstance(p, GoalBlockLeft) or isinstance(p, GoalBlockRight):
-                            p.set_draw_procedural(constants.TILE_X, constants.TILE_Y, p.image_full)
+                            p.set_draw_procedural(self.level_loaded.TILE_X, self.level_loaded.TILE_Y, p.image_full)
                 else:
                     for p in platforms:
                         if isinstance(p, GoalBlockLeft) or isinstance(p, GoalBlockRight):
-                            p.set_draw_procedural(constants.TILE_X, constants.TILE_Y, p.image_empty)
+                            p.set_draw_procedural(self.level_loaded.TILE_X, self.level_loaded.TILE_Y, p.image_empty)
 
             else:
                 if player_p1.on_goal and player_p2.on_goal:
                     done = True
                     for p in platforms:
                         if isinstance(p, GoalBlockLeft) or isinstance(p, GoalBlockRight):
-                            p.set_draw_procedural(constants.TILE_X, constants.TILE_Y, p.image_full)
+                            p.set_draw_procedural(self.level_loaded.TILE_X, self.level_loaded.TILE_Y, p.image_full)
                 elif player_p1.on_goal and not player_p2.on_goal:
                     for p in platforms:
                         if isinstance(p, GoalBlockLeft):
-                            p.set_draw_procedural(constants.TILE_X, constants.TILE_Y, p.image_empty)
+                            p.set_draw_procedural(self.level_loaded.TILE_X, self.level_loaded.TILE_Y, p.image_empty)
                         if isinstance(p, GoalBlockRight):
-                            p.set_draw_procedural(constants.TILE_X, constants.TILE_Y, p.image_full)
+                            p.set_draw_procedural(self.level_loaded.TILE_X, self.level_loaded.TILE_Y, p.image_full)
                 elif not player_p1.on_goal and player_p2.on_goal:
                     for p in platforms:
                         if isinstance(p, GoalBlockLeft):
-                            p.set_draw_procedural(constants.TILE_X, constants.TILE_Y, p.image_full)
+                            p.set_draw_procedural(self.level_loaded.TILE_X, self.level_loaded.TILE_Y, p.image_full)
                         if isinstance(p, GoalBlockRight):
-                            p.set_draw_procedural(constants.TILE_X, constants.TILE_Y, p.image_empty)
+                            p.set_draw_procedural(self.level_loaded.TILE_X, self.level_loaded.TILE_Y, p.image_empty)
                 else:
                     for p in platforms:
                         if isinstance(p, GoalBlockLeft) or isinstance(p, GoalBlockRight):
-                            p.set_draw_procedural(constants.TILE_X, constants.TILE_Y, p.image_empty)
+                            p.set_draw_procedural(self.level_loaded.TILE_X, self.level_loaded.TILE_Y, p.image_empty)
 
             self.level_loaded.print_background()
             entities.draw(self.layout.screen_game)
+            # self.layout.update(player_p2.rect, zoom=1.2)
             self.layout.update()
             clock.tick(60)
 

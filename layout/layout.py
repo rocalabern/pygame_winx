@@ -7,8 +7,8 @@ class Layout:
     def __init__(
             self,
             screen_desktop: pygame.Surface,
-            game_w: int = 1280,
-            game_h: int = 720,
+            game_w: int = 4*1280,
+            game_h: int = 4*720,
             debug: bool = True,
             allow_rescale: bool = True
     ):
@@ -69,11 +69,22 @@ class Layout:
         pos_y = int(round(0 + factor_y))
         return pos_x, pos_y
 
-    def update(self):
+    def update(self, rect:pygame.Rect = None, zoom: float = 1.0):
         if self.allow_rescale:
-            scaled_screen = pygame.transform.scale(self.screen_game, (self.w+1, self.h+1))
-            self.screen_desktop.blit(scaled_screen, (self.x_offset, self.y_offset))
-            pygame.display.update()
+            if rect is not None:
+                perc_x = (rect.left + rect.width / 2) / self.game_w
+                perc_y = (rect.top + rect.height / 2) / self.game_h
+                scaled_screen = pygame.transform.scale(self.screen_game, (int(round(zoom*(self.w+1))), int(round(zoom*(self.h+1)))))
+                x_offset = int(round(self.x_offset + self.w/2 - perc_x * zoom * self.w))
+                y_offset = int(round(self.x_offset + self.h/2 - perc_y * zoom * self.h))
+                x_offset = max(min(x_offset, 0), - scaled_screen.get_width() + self.desktop_w)
+                y_offset = max(min(y_offset, 0), - scaled_screen.get_height() + self.desktop_h)
+                self.screen_desktop.blit(scaled_screen, (x_offset, y_offset))
+                scaled_screen = pygame.transform.scale(self.screen_game, (320, 180))
+                self.screen_desktop.blit(scaled_screen, (0, 0))
+            else:
+                scaled_screen = pygame.transform.scale(self.screen_game, (self.w+1, self.h+1))
+                self.screen_desktop.blit(scaled_screen, (self.x_offset, self.y_offset))
         else:
             self.screen_desktop.blit(self.screen_game, (self.x_offset, self.y_offset))
-            pygame.display.update()
+        pygame.display.update()

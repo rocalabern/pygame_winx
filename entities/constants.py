@@ -1,8 +1,5 @@
 
 
-SCREEN_WIDTH = 1366
-SCREEN_HEIGHT = 768
-
 IMAGE_P1 = "images/julia_and_mar/face_mar.png"
 IMAGE_P2 = "images/julia_and_mar/face_julia.png"
 

@@ -25,10 +25,13 @@ class Level:
             self,
             layout: Layout,
             level_file: str,
+            gravity=10,
+            velocity_fall_max=20,
             velocity_movement=4,
             velocity_jump=4,
             velocity_fly=1,
             velocity_fly_max=12,
+            enemy_velocity_movement=1,
             num_players: int = 0
     ):
         self.layout = layout
@@ -37,14 +40,23 @@ class Level:
         self.TILE_Y_NUM = self.level.__len__()
         self.TILE_X_NUM = self.level[0].__len__()
 
+        self.GRAVITY = gravity
+        self.VELOCITY_FALL_MAX = velocity_fall_max
+
         self.VELOCITY_MOVEMENT = velocity_movement
         self.VELOCITY_JUMP = velocity_jump
-        self.VELOCITY_MAX_FALL = 10
 
         self.VELOCITY_FLY = velocity_fly
         self.VELOCITY_FLY_MAX = velocity_fly_max
 
+        self.ENEMY_VELOCITY_MOVEMENT = enemy_velocity_movement
+
         self.num_players = num_players
+
+        self.TILE_X = int(self.layout.game_w / self.TILE_X_NUM)
+        self.TILE_Y = int(self.layout.game_h / self.TILE_Y_NUM)
+        self.offset_w = int(round((self.layout.game_w - self.TILE_X * self.TILE_X_NUM) / 2))
+        self.offset_h = int(round((self.layout.game_h - self.TILE_Y * self.TILE_Y_NUM) / 2))
 
     def prepare_background(self):
         print("[Level] prepare_background")

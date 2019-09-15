@@ -1,6 +1,7 @@
 import pygame
 from pygame import *
 
+from levels import Level
 from lib import *
 from entities import constants
 from .platformblock import PlatformBlock
@@ -14,20 +15,20 @@ class GoalBlockLeft(PlatformBlock):
     collides = True
     has_grip = False
 
-    def __init__(self, x, y):
-        PlatformBlock.__init__(self, x, y)
-        self.set_draw_procedural(constants.TILE_X, constants.TILE_Y, self.image_empty)
-        self.rect = Rect(x, y, constants.TILE_X, constants.TILE_Y)
+    def __init__(self, level_loaded: Level, x, y):
+        PlatformBlock.__init__(self, level_loaded, x, y)
+        self.set_draw_procedural(level_loaded.TILE_X, level_loaded.TILE_Y, self.image_empty)
+        self.rect = Rect(x, y, level_loaded.TILE_X, level_loaded.TILE_Y)
 
-    def set_draw_procedural(self, tile_x, tile_y, image_file):
+    def set_draw_procedural(self, TILE_X, TILE_Y, image_file):
         bessel_perc = 8
         color_dark = "#b3b300"
         color_light = "#e6e600"
         color_main = "#ffff99"
 
         temp = create_block_bessel_left(
-            constants.TILE_X,
-            constants.TILE_Y,
+            TILE_X,
+            TILE_Y,
             color_dark, color_light, color_main,
             bessel_perc)
 
@@ -35,7 +36,8 @@ class GoalBlockLeft(PlatformBlock):
         temp_image = pygame.image.load(image_file)
         if flip:
             temp_image = pygame.transform.flip(temp_image, True, False)
-        temp_image = pygame.transform.scale(temp_image, (constants.TILE_X, constants.TILE_Y))
-        temp.blit(temp_image, [constants.TILE_X//2, 0])
+        temp_image = pygame.transform.scale(temp_image, (TILE_X, TILE_Y))
+        temp.blit(temp_image, [TILE_X//2, 0])
 
         self.image = temp
+

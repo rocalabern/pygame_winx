@@ -10,18 +10,19 @@ from entities import GoalBlock
 from entities import GoalBlockLeft
 from entities import GoalBlockRight
 from entities import StarItem
+from levels import Level
 
 
-def draw_player(color, image_file=None, flip=False, force_background=False):
-    temp_image = Surface((constants.TILE_X, constants.TILE_Y))
+def draw_player(level_loaded: Level, color, image_file=None, flip=False, force_background=False):
+    temp_image = Surface((level_loaded.TILE_X, level_loaded.TILE_Y))
     temp_image.fill(Color(color))
     if image_file is not None:
         temp = pygame.image.load(image_file)
         if flip:
             temp = pygame.transform.flip(temp, True, False)
-        temp = pygame.transform.scale(temp, (constants.TILE_X, constants.TILE_Y))
+        temp = pygame.transform.scale(temp, (level_loaded.TILE_X, level_loaded.TILE_Y))
         temp_image.blit(temp, [0, 0])
-        if constants.TILE_X > 16 and not force_background:
+        if level_loaded.TILE_X > 16 and not force_background:
             temp_image = temp   # without background
     temp_image.convert()
     return temp_image
@@ -35,6 +36,7 @@ class Player(Entity):
 
     def __init__(
             self,
+            level_loaded: Level,
             x, y, name,
             color="#000000",
             image_file=None,
@@ -45,6 +47,7 @@ class Player(Entity):
     ):
         Entity.__init__(self)
         self.name = name
+        self.level_loaded = level_loaded
         self.color = color
         self.xvel = 0
         self.yvel = 0
@@ -52,9 +55,9 @@ class Player(Entity):
         self.onStairs = False
         self.onBar = False
         self.on_goal = False
-        self.image = draw_player(self.color, image_file, flip, force_background)
+        self.image = draw_player(level_loaded, self.color, image_file, flip, force_background)
         self.image_transform = image_transform
-        self.rect = Rect(x, y, constants.TILE_X-2, constants.TILE_Y)
+        self.rect = Rect(x, y, level_loaded.TILE_X-2, level_loaded.TILE_Y)
         if jump_sound is None:
             self.jump_sound = None
         else:
@@ -65,38 +68,38 @@ class Player(Entity):
         temp_image = pygame.image.load(self.image_transform)
         if flip:
             temp_image = pygame.transform.flip(temp_image, True, False)
-        temp_image = pygame.transform.scale(temp_image, (constants.TILE_X, constants.TILE_Y))
+        temp_image = pygame.transform.scale(temp_image, (self.level_loaded.TILE_X, self.level_loaded.TILE_Y))
         temp_image.convert()
         self.image = temp_image
 
     def update(self, up, down, left, right, platforms):
         if self.onStairs:
             self.yvel = 0
-            if up: self.yvel = -constants.VELOCITY_MOVEMENT
-            if down: self.yvel = constants.VELOCITY_MOVEMENT
+            if up: self.yvel = -self.level_loaded.VELOCITY_MOVEMENT
+            if down: self.yvel = self.level_loaded.VELOCITY_MOVEMENT
         if self.onBar and down:
-            self.yvel = constants.VELOCITY_MOVEMENT
+            self.yvel = self.level_loaded.VELOCITY_MOVEMENT
         if self.onGround and up:
             # only jump if on the ground
             self.jump_sound.play()
-            self.yvel -= constants.VELOCITY_JUMP
+            self.yvel -= self.level_loaded.VELOCITY_JUMP
 
-        if self.transformed and up and self.yvel > -constants.VELOCITY_FLY_MAX:
-            self.yvel -= constants.VELOCITY_FLY
-        if self.transformed and down and self.yvel < constants.VELOCITY_FLY_MAX:
-            self.yvel += constants.VELOCITY_FLY
+        if self.transformed and up and self.yvel > -self.level_loaded.VELOCITY_FLY_MAX:
+            self.yvel -= self.level_loaded.VELOCITY_FLY
+        if self.transformed and down and self.yvel < self.level_loaded.VELOCITY_FLY_MAX:
+            self.yvel += self.level_loaded.VELOCITY_FLY
 
         if not self.onGround and not self.onStairs and not self.onBar:
             # only accelerate with gravity if in the air
-            self.yvel += 0.3
+            self.yvel += self.level_loaded.GRAVITY
             # max falling speed
-            if self.yvel > constants.VELOCITY_MAX_FALL:
-                self.yvel = constants.VELOCITY_MAX_FALL
+            if self.yvel > self.level_loaded.VELOCITY_FALL_MAX:
+                self.yvel = self.level_loaded.VELOCITY_FALL_MAX
 
         if left:
-            self.xvel = -constants.VELOCITY_MOVEMENT
+            self.xvel = -self.level_loaded.VELOCITY_MOVEMENT
         if right:
-            self.xvel = constants.VELOCITY_MOVEMENT
+            self.xvel = self.level_loaded.VELOCITY_MOVEMENT
         if not(left or right):
             self.xvel = 0
         if not(up or down) and self.onStairs and self.onBar:

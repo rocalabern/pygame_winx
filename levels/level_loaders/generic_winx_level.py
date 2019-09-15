@@ -10,19 +10,25 @@ class GenericWinxLevel(Level):
             self,
             layout: Layout,
             level_file: str,
-            velocity_movement=4,
-            velocity_jump=4,
-            velocity_fly=1,
-            velocity_fly_max=12,
+            gravity=1.5,
+            velocity_fall_max=50,
+            velocity_movement=16,
+            velocity_jump=40,
+            velocity_fly=4,
+            velocity_fly_max=48,
+            enemy_velocity_movement=4,
             num_players: int = 0
     ):
         super().__init__(
             layout,
             level_file,
+            gravity,
+            velocity_fall_max,
             velocity_movement,
             velocity_jump,
             velocity_fly,
             velocity_fly_max,
+            enemy_velocity_movement,
             num_players
         )
 
