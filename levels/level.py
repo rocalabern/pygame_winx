@@ -20,6 +20,7 @@ def get_background_tile_simple(tile_x, tile_y):
 
     return bg
 
+
 class Level:
 
     def __init__(
