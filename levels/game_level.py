@@ -17,42 +17,53 @@ def load_level(level_loaded: Level):
     entities = pygame.sprite.Group()
     platforms = []
     enemies = []
+    players = []
 
     # build the level
-    player_p1 = Player(level_loaded, 0, 0, "dummy")
-    player_p2 = Player(level_loaded, 0, 0, "dummy")
+    player_p1 = Player(level_loaded, 0, 0, "dummy", K_UP, K_DOWN, K_RIGHT, K_LEFT)
+    player_p2 = Player(level_loaded, 0, 0, "dummy", K_w, K_s, K_d, K_a)
     y = offset_h
-    for level_row in level_loaded.level:
+    for i_row in range(0, level_loaded.TILE_Y_NUM):
         x = offset_w
-        for level_block in level_row:
+        level_row = level_loaded.level[i_row]
+        for i_col in range(0, level_loaded.TILE_X_NUM):
+            level_block = level_row[i_col]
+            level_loaded.level_matrix[i_row][i_col] = 0
             if level_block == "▉" or level_block == "P":
                 e = PlatformBlock(level_loaded, x, y)
                 platforms.append(e)
                 entities.add(e)
+                level_loaded.level_matrix[i_row][i_col] = -1
             if level_block == "╬" or level_block == "E":
                 e = StairsBlock(level_loaded, x, y)
                 platforms.append(e)
                 entities.add(e)
+                level_loaded.level_matrix[i_row][i_col] = 2
             if level_block == "-" or level_block == "B":
                 e = BarBlock(level_loaded, x, y)
                 platforms.append(e)
                 entities.add(e)
+                level_loaded.level_matrix[i_row][i_col] = 3
             if level_block == "_" or level_block == "H":
                 e = BarHBlock(x, y)
                 platforms.append(e)
                 entities.add(e)
+                level_loaded.level_matrix[i_row][i_col] = 3
             if level_block == "⊟" or level_block == "G":
                 e = GoalBlock(level_loaded, x, y)
                 platforms.append(e)
                 entities.add(e)
+                level_loaded.level_matrix[i_row][i_col] = -1
             if level_block == "⊏" or level_block == "L":
                 e = GoalBlockLeft(level_loaded, x, y)
                 platforms.append(e)
                 entities.add(e)
+                level_loaded.level_matrix[i_row][i_col] = -1
             if level_block == "⊐" or level_block == "R":
                 e = GoalBlockRight(level_loaded, x, y)
                 platforms.append(e)
                 entities.add(e)
+                level_loaded.level_matrix[i_row][i_col] = -1
 
             if level_block == "⭐" or level_block == "S":
                 e = StarItem(level_loaded, x, y)
@@ -76,6 +87,7 @@ def load_level(level_loaded: Level):
                 player_p1 = Player(
                     level_loaded,
                     x, y, "Y",
+                    K_UP, K_DOWN, K_RIGHT, K_LEFT,
                     constants.PLAYER_P1_COLOR_BG,
                     constants.IMAGE_P1,
                     constants.IMAGE_P1_TRANSFORMED,
@@ -88,6 +100,7 @@ def load_level(level_loaded: Level):
                 player_p2 = Player(
                     level_loaded,
                     x, y, "X",
+                    K_w, K_s, K_d, K_a,
                     constants.PLAYER_P2_COLOR_BG, constants.IMAGE_P2,
                     constants.IMAGE_P2_TRANSFORMED,
                     flip=True,
@@ -97,6 +110,17 @@ def load_level(level_loaded: Level):
 
             x += tile_x
         y += tile_y
+
+    for i_row in range(0, level_loaded.TILE_Y_NUM-1):
+        for i_col in range(0, level_loaded.TILE_X_NUM):
+            if i_row < level_loaded.TILE_Y_NUM-1:
+                if level_loaded.level_matrix[i_row+1][i_col] == -1:
+                    level_loaded.level_matrix[i_row][i_col] = 1
+                if level_loaded.level_matrix[i_row + 1][i_col] == 2:
+                    level_loaded.level_matrix[i_row][i_col] = 1
+                if level_loaded.level_matrix[i_row + 1][i_col] == 3:
+                    level_loaded.level_matrix[i_row][i_col] = 3
+
     if player_p1.name is not "Dummy":
         platforms.append(player_p1)
         entities.add(player_p1)
@@ -134,7 +158,8 @@ class GameLevel:
         while not done:
 
             # e: event
-            for e in pygame.event.get():
+            l_events = pygame.event.get()
+            for e in l_events:
                 if e.type == QUIT:
                     raise SystemExit("ESCAPE")
                 if e.type == KEYDOWN and e.key == K_ESCAPE:
@@ -145,29 +170,12 @@ class GameLevel:
                     done = True
                     skip = True
 
-                if e.type == KEYDOWN or e.type == KEYUP:
-
-                    if e.key == K_UP:
-                        up_p1 = e.type == KEYDOWN
-                    if e.key == K_DOWN:
-                        down_p1 = e.type == KEYDOWN
-                    if e.key == K_LEFT:
-                        left_p1 = e.type == KEYDOWN
-                    if e.key == K_RIGHT:
-                        right_p1 = e.type == KEYDOWN
-
-                    if e.key == K_w:
-                        up_p2 = e.type == KEYDOWN
-                    if e.key == K_s:
-                        down_p2 = e.type == KEYDOWN
-                    if e.key == K_a:
-                        left_p2 = e.type == KEYDOWN
-                    if e.key == K_d:
-                        right_p2 = e.type == KEYDOWN
+            player_p1.play(l_events)
+            player_p2.play(l_events)
 
             # update player, draw everything else
-            player_p1.update(up_p1, down_p1, left_p1, right_p1, platforms)
-            player_p2.update(up_p2, down_p2, left_p2, right_p2, platforms)
+            player_p1.update(platforms)
+            player_p2.update(platforms)
             for e in enemies:
                 e.update(platforms, player_p1, player_p2)
 

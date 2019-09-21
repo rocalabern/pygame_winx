@@ -13,9 +13,9 @@ from entities import StarItem
 from levels import Level
 
 
-def draw_player(level_loaded: Level, color, image_file=None, flip=False, force_background=False):
+def draw_player(level_loaded: Level, bg_color, image_file=None, flip=False, force_background=False):
     temp_image = Surface((level_loaded.TILE_X, level_loaded.TILE_Y))
-    temp_image.fill(Color(color))
+    temp_image.fill(Color(bg_color))
     if image_file is not None:
         temp = pygame.image.load(image_file)
         if flip:
@@ -38,24 +38,39 @@ class Player(Entity):
             self,
             level_loaded: Level,
             x, y, name,
-            color="#000000",
+            key_up,
+            key_down,
+            key_right,
+            key_left,
+            bg_color="#000000",
             image_file=None,
             image_transform=None,
             flip=False,
             force_background=False,
-            jump_sound=None
+            jump_sound=None,
     ):
         Entity.__init__(self)
         self.name = name
         self.level_loaded = level_loaded
-        self.color = color
-        self.xvel = 0
-        self.yvel = 0
+
+        self.key_up = key_up
+        self.key_down = key_down
+        self.key_right = key_right
+        self.key_left = key_left
+
+        self.key_pressed_up = False
+        self.key_pressed_down = False
+        self.key_pressed_left = False
+        self.key_pressed_right = False
+
+        self.bg_color = bg_color
+        self.vel_x = 0
+        self.vel_y = 0
         self.onGround = False
         self.onStairs = False
         self.onBar = False
         self.on_goal = False
-        self.image = draw_player(level_loaded, self.color, image_file, flip, force_background)
+        self.image = draw_player(level_loaded, self.bg_color, image_file, flip, force_background)
         self.image_transform = image_transform
         self.rect = Rect(x, y, level_loaded.TILE_X-2, level_loaded.TILE_Y)
         if jump_sound is None:
@@ -63,6 +78,18 @@ class Player(Entity):
         else:
             self.jump_sound = pygame.mixer.Sound(jump_sound)
             self.jump_sound.set_volume(1.0)
+
+    def play(self, l_events):
+        for e in l_events:
+            if e.type == KEYDOWN or e.type == KEYUP:
+                if e.key == self.key_up:
+                    self.key_pressed_up = e.type == KEYDOWN
+                if e.key == self.key_down:
+                    self.key_pressed_down = e.type == KEYDOWN
+                if e.key == self.key_left:
+                    self.key_pressed_left = e.type == KEYDOWN
+                if e.key == self.key_right:
+                    self.key_pressed_right = e.type == KEYDOWN
 
     def transform(self, flip=False):
         temp_image = pygame.image.load(self.image_transform)
@@ -72,49 +99,53 @@ class Player(Entity):
         temp_image.convert()
         self.image = temp_image
 
-    def update(self, up, down, left, right, platforms):
+    def update(self, platforms):
+        up = self.key_pressed_up
+        down = self.key_pressed_down
+        left = self.key_pressed_left
+        right = self.key_pressed_right
         if self.onStairs:
-            self.yvel = 0
-            if up: self.yvel = -self.level_loaded.VELOCITY_MOVEMENT
-            if down: self.yvel = self.level_loaded.VELOCITY_MOVEMENT
+            self.vel_y = 0
+            if up: self.vel_y = -self.level_loaded.VELOCITY_MOVEMENT
+            if down: self.vel_y = self.level_loaded.VELOCITY_MOVEMENT
         if self.onBar and down:
-            self.yvel = self.level_loaded.VELOCITY_MOVEMENT
+            self.vel_y = self.level_loaded.VELOCITY_MOVEMENT
         if self.onGround and up:
             # only jump if on the ground
             self.jump_sound.play()
-            self.yvel -= self.level_loaded.VELOCITY_JUMP
+            self.vel_y -= self.level_loaded.VELOCITY_JUMP
 
-        if self.transformed and up and self.yvel > -self.level_loaded.VELOCITY_FLY_MAX:
-            self.yvel -= self.level_loaded.VELOCITY_FLY
-        if self.transformed and down and self.yvel < self.level_loaded.VELOCITY_FLY_MAX:
-            self.yvel += self.level_loaded.VELOCITY_FLY
+        if self.transformed and up and self.vel_y > -self.level_loaded.VELOCITY_FLY_MAX:
+            self.vel_y -= self.level_loaded.VELOCITY_FLY
+        if self.transformed and down and self.vel_y < self.level_loaded.VELOCITY_FLY_MAX:
+            self.vel_y += self.level_loaded.VELOCITY_FLY
 
         if not self.onGround and not self.onStairs and not self.onBar:
             # only accelerate with gravity if in the air
-            self.yvel += self.level_loaded.GRAVITY
+            self.vel_y += self.level_loaded.GRAVITY
             # max falling speed
-            if self.yvel > self.level_loaded.VELOCITY_FALL_MAX:
-                self.yvel = self.level_loaded.VELOCITY_FALL_MAX
+            if self.vel_y > self.level_loaded.VELOCITY_FALL_MAX:
+                self.vel_y = self.level_loaded.VELOCITY_FALL_MAX
 
         if left:
-            self.xvel = -self.level_loaded.VELOCITY_MOVEMENT
+            self.vel_x = -self.level_loaded.VELOCITY_MOVEMENT
         if right:
-            self.xvel = self.level_loaded.VELOCITY_MOVEMENT
+            self.vel_x = self.level_loaded.VELOCITY_MOVEMENT
         if not(left or right):
-            self.xvel = 0
+            self.vel_x = 0
         if not(up or down) and self.onStairs and self.onBar:
-            self.yvel = 0
+            self.vel_y = 0
 
         # increment in x direction
-        self.rect.left += self.xvel
+        self.rect.left += self.vel_x
         # do x-axis collisions
-        self.collide(self.xvel, 0, up, down, left, right, platforms)
+        self.collide(self.vel_x, 0, up, down, left, right, platforms)
         # increment in y direction
-        self.rect.top += self.yvel
+        self.rect.top += self.vel_y
         # do y-axis collisions
-        self.collide(0, self.yvel, up, down, left, right, platforms)
+        self.collide(0, self.vel_y, up, down, left, right, platforms)
 
-    def collide(self, xvel, yvel, up, down, left, right, platforms):
+    def collide(self, vel_x, vel_y, up, down, left, right, platforms):
 
         any_stairs = False
         any_bar = False
@@ -127,13 +158,13 @@ class Player(Entity):
             if isinstance(self, Player) and (isinstance(p, GoalBlock) or isinstance(p, GoalBlockLeft) or isinstance(p, GoalBlockRight)):
                 offset = 1
                 self.rect.top += offset
-                if pygame.sprite.collide_rect(self, p) and self.yvel >= 0:
+                if pygame.sprite.collide_rect(self, p) and self.vel_y >= 0:
                     self.on_goal = True
                 self.rect.top -= offset
 
             if pygame.sprite.collide_rect(self, p) and p is not self:
 
-                if yvel > 0 and (
+                if vel_y > 0 and (
                         isinstance(p, PlatformBlock)
                         or isinstance(p, GoalBlock)
                 ):
@@ -148,26 +179,26 @@ class Player(Entity):
                         self.transform()
                     self.transformed = True
 
-                if xvel > 0 and p.collides:
+                if vel_x > 0 and p.collides:
                     self.rect.right = p.rect.left
-                    self.xvel = 0
-                if xvel < 0 and p.collides:
+                    self.vel_x = 0
+                if vel_x < 0 and p.collides:
                     self.rect.left = p.rect.right
-                    self.xvel = 0
+                    self.vel_x = 0
 
-                if yvel > 0 and p.collides:
+                if vel_y > 0 and p.collides:
                     self.rect.bottom = p.rect.top
-                    self.yvel = 0
-                if yvel < 0 and p.collides:
+                    self.vel_y = 0
+                if vel_y < 0 and p.collides:
                     self.rect.top = p.rect.bottom
-                    self.yvel = 0
-                if yvel > 0 and p.has_grip and not (self.onStairs or self.onBar) and not down:
+                    self.vel_y = 0
+                if vel_y > 0 and p.has_grip and not (self.onStairs or self.onBar) and not down:
                     # this is like a collision since we are not moving
                     self.rect.bottom = p.rect.top
-                    self.yvel = 0
+                    self.vel_y = 0
 
-        if not any_bar and self.onBar and yvel < 0:
-            self.yvel = 1
+        if not any_bar and self.onBar and vel_y < 0:
+            self.vel_y = 1
 
         self.onStairs = any_stairs
         self.onBar = any_bar
