@@ -118,10 +118,10 @@ class GameLevel:
 
         (entities, platforms, enemies, player_p1, player_p2) = load_level(self.level_loaded)
 
-        music_file = 'music/instrumental-winx-club-butterflix.mp3'
-        pygame.mixer.music.load(music_file)
-        pygame.mixer.music.set_volume(0.1)
-        pygame.mixer.music.play(-1)
+        # music_file = 'music/instrumental-winx-club-butterflix.mp3'
+        # pygame.mixer.music.load(music_file)
+        # pygame.mixer.music.set_volume(0.1)
+        # pygame.mixer.music.play(-1)
 
         self.level_loaded.prepare_background()
 

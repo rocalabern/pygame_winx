@@ -1,3 +1,4 @@
+import numpy as np
 import pygame
 from lib import *
 
@@ -39,6 +40,9 @@ class Level:
         self.level = read_level(self.LEVEL_FILE)
         self.TILE_Y_NUM = self.level.__len__()
         self.TILE_X_NUM = self.level[0].__len__()
+
+        self.level_matrix_walk = np.zeros((self.TILE_Y_NUM, self.TILE_X_NUM))
+        self.level_matrix_fly = np.zeros((self.TILE_Y_NUM, self.TILE_X_NUM))
 
         self.GRAVITY = gravity
         self.VELOCITY_FALL_MAX = velocity_fall_max
