@@ -31,10 +31,14 @@ def draw_procedural(TILE_X, TILE_Y):
 
 class GoalBlock(PlatformBlock):
 
-    collides = True
-    has_grip = False
-
     def __init__(self, level_loaded: Level, x, y):
         PlatformBlock.__init__(self, level_loaded, x, y)
+        self.collides = True
+        self.has_grip = False
+        self.item = False
+        self.collectable = False
+        self.transformed = False
+        self.fly = False
+
         self.image = draw_procedural(level_loaded.TILE_X, level_loaded.TILE_Y)
         self.rect = Rect(x, y, level_loaded.TILE_X, level_loaded.TILE_Y)

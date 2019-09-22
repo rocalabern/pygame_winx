@@ -15,11 +15,15 @@ def draw_sprite(TILE_X, TILE_Y):
 
 class StarItem(Entity):
 
-    collides = False
-    has_grip = False
-
     def __init__(self, level_loaded: Level, x, y):
         Entity.__init__(self)
+        self.collides = False
+        self.has_grip = False
+        self.item = True
+        self.collectable = True
+        self.transformed = False
+        self.fly = False
+
         self.image = draw_sprite(level_loaded.TILE_X, level_loaded.TILE_Y)
         self.rect = Rect(x, y, level_loaded.TILE_X, level_loaded.TILE_Y)
 

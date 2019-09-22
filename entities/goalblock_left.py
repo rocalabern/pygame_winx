@@ -12,11 +12,15 @@ class GoalBlockLeft(PlatformBlock):
     image_empty = "images/sprites/HUD/hudHeart_empty.png"
     image_full = "images/sprites/HUD/hudHeart_full.png"
 
-    collides = True
-    has_grip = False
-
     def __init__(self, level_loaded: Level, x, y):
         PlatformBlock.__init__(self, level_loaded, x, y)
+        self.collides = True
+        self.has_grip = False
+        self.item = False
+        self.collectable = False
+        self.transformed = False
+        self.fly = False
+
         self.set_draw_procedural(level_loaded.TILE_X, level_loaded.TILE_Y, self.image_empty)
         self.rect = Rect(x, y, level_loaded.TILE_X, level_loaded.TILE_Y)
 

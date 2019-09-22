@@ -45,11 +45,15 @@ def draw_procedural(TILE_X, TILE_Y):
 
 class StairsBlock(Entity):
 
-    collides = False
-    has_grip = True
-
     def __init__(self, level_loaded: Level, x, y):
         Entity.__init__(self)
+        self.collides = False
+        self.has_grip = True
+        self.item = False
+        self.collectable = False
+        self.transformed = False
+        self.fly = False
+
         self.image = draw_procedural(level_loaded.TILE_X, level_loaded.TILE_Y)
         self.rect = Rect(x, y, level_loaded.TILE_X, level_loaded.TILE_Y)
 

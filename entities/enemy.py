@@ -1,5 +1,6 @@
 import pygame
 from pygame import *
+import numpy as np
 
 from entities import constants
 from entities import Entity
@@ -11,6 +12,7 @@ from entities import GoalBlockLeft
 from entities import GoalBlockRight
 from entities import StarItem
 from levels import Level
+from lib import Dijkstra
 
 
 def draw_player(level_loaded: Level, bg_color, image_file=None, flip=False, force_background=False):
@@ -28,7 +30,11 @@ def draw_player(level_loaded: Level, bg_color, image_file=None, flip=False, forc
     return temp_image
 
 
-class Player(Entity):
+class Enemy(Entity):
+
+    collides = True
+    has_grip = False
+    transformed = False
 
     def __init__(
             self,
@@ -110,69 +116,63 @@ class Player(Entity):
                 self.key_pressed_right = True
 
     def transform(self, flip=False):
-        temp_image = pygame.image.load(self.image_transform)
-        if flip:
-            temp_image = pygame.transform.flip(temp_image, True, False)
-        temp_image = pygame.transform.scale(temp_image, (self.level_loaded.TILE_X, self.level_loaded.TILE_Y))
-        temp_image.convert()
-        self.image = temp_image
-        self.transformed = True
-        self.fly = True
+        pass
 
-    def update(self, platforms):
-        up = self.key_pressed_up
-        down = self.key_pressed_down
-        left = self.key_pressed_left
-        right = self.key_pressed_right
-        if self.fly:
-            if up:
-                self.vel_y = -self.level_loaded.VELOCITY_MOVEMENT
-            if down:
-                self.vel_y = self.level_loaded.VELOCITY_MOVEMENT
-            if right:
-                self.vel_x = self.level_loaded.VELOCITY_MOVEMENT
-            if left:
-                self.vel_x = -self.level_loaded.VELOCITY_MOVEMENT
-            if not(right or left):
-                self.vel_x = 0
-            if not(up or down):
-                self.vel_y = 0
-        else:
-            if self.onStairs:
-                self.vel_y = 0
-                if up:
-                    self.vel_y = -self.level_loaded.VELOCITY_MOVEMENT
-                if down:
-                    self.vel_y = self.level_loaded.VELOCITY_MOVEMENT
-            if self.onBar and down:
-                self.vel_y = self.level_loaded.VELOCITY_MOVEMENT
-            if self.onGround and up:
-                # only jump if on the ground
-                if self.jump_sound is not None:
-                    self.jump_sound.play()
-                self.vel_y -= self.level_loaded.VELOCITY_JUMP
+    def update(self, platforms, players):
+        min_dist = np.inf
+        for p1 in players:
+            dist1 = (self.rect.left - p1.rect.left) ** 2 + (self.rect.top - p1.rect.top) ** 2
+            if dist1 < min_dist:
+                p = p1
+                min_dist = dist1
 
-            if self.fly and up and self.vel_y > -self.level_loaded.VELOCITY_FLY_MAX:
-                self.vel_y -= self.level_loaded.VELOCITY_FLY
-            if self.fly and down and self.vel_y < self.level_loaded.VELOCITY_FLY_MAX:
-                self.vel_y += self.level_loaded.VELOCITY_FLY
+        x_end = int((p.rect.top - self.level_loaded.offset_w) / self.level_loaded.TILE_X)
+        y_end = int((p.rect.left - self.level_loaded.offset_h) / self.level_loaded.TILE_Y)
+        x_ini = int((self.rect.top - self.level_loaded.offset_w) / self.level_loaded.TILE_X)
+        y_ini = int((self.rect.left - self.level_loaded.offset_h) / self.level_loaded.TILE_Y)
 
-            if not self.onGround and not self.onStairs and not self.onBar:
-                # only accelerate with gravity if in the air
-                if not self.fly:
-                    self.vel_y += self.level_loaded.GRAVITY
-                    # max falling speed
-                    if self.vel_y > self.level_loaded.VELOCITY_FALL_MAX:
-                        self.vel_y = self.level_loaded.VELOCITY_FALL_MAX
+        maze = self.level_loaded.level_matrix
+        maze_dijkstra = Dijkstra(maze)
+        maze_dijkstra.blocked_elements = [-1]
 
-            if right:
-                self.vel_x = self.level_loaded.VELOCITY_MOVEMENT
-            if left:
-                self.vel_x = -self.level_loaded.VELOCITY_MOVEMENT
-            if not(right or left):
-                self.vel_x = 0
-            if not(up or down) and self.onStairs and self.onBar:
-                self.vel_y = 0
+        # path = maze_dijkstra.shortest_path((x_ini, y_ini), (x_end, y_end))
+
+        up = False
+        down = False
+        left = True
+        right = False
+
+        if self.onStairs:
+            self.vel_y = 0
+            if up: self.vel_y = -self.level_loaded.VELOCITY_MOVEMENT
+            if down: self.vel_y = self.level_loaded.VELOCITY_MOVEMENT
+        if self.onBar and down:
+            self.vel_y = self.level_loaded.VELOCITY_MOVEMENT
+        if self.onGround and up:
+            # only jump if on the ground
+            self.jump_sound.play()
+            self.vel_y -= self.level_loaded.VELOCITY_JUMP
+
+        if self.transformed and up and self.vel_y > -self.level_loaded.VELOCITY_FLY_MAX:
+            self.vel_y -= self.level_loaded.VELOCITY_FLY
+        if self.transformed and down and self.vel_y < self.level_loaded.VELOCITY_FLY_MAX:
+            self.vel_y += self.level_loaded.VELOCITY_FLY
+
+        if not self.onGround and not self.onStairs and not self.onBar:
+            # only accelerate with gravity if in the air
+            self.vel_y += self.level_loaded.GRAVITY
+            # max falling speed
+            if self.vel_y > self.level_loaded.VELOCITY_FALL_MAX:
+                self.vel_y = self.level_loaded.VELOCITY_FALL_MAX
+
+        if left:
+            self.vel_x = -self.level_loaded.VELOCITY_MOVEMENT
+        if right:
+            self.vel_x = self.level_loaded.VELOCITY_MOVEMENT
+        if not(left or right):
+            self.vel_x = 0
+        if not(up or down) and self.onStairs and self.onBar:
+            self.vel_y = 0
 
         # increment in x direction
         self.rect.left += self.vel_x
@@ -188,17 +188,8 @@ class Player(Entity):
         any_stairs = False
         any_bar = False
         self.onGround = False
-        if isinstance(self, Player):
-            self.on_goal = False
 
         for p in platforms:
-
-            if isinstance(self, Player) and (isinstance(p, GoalBlock) or isinstance(p, GoalBlockLeft) or isinstance(p, GoalBlockRight)):
-                offset = 1
-                self.rect.top += offset
-                if pygame.sprite.collide_rect(self, p) and self.vel_y >= 0:
-                    self.on_goal = True
-                self.rect.top -= offset
 
             if pygame.sprite.collide_rect(self, p) and p is not self:
 
@@ -215,6 +206,7 @@ class Player(Entity):
                 if isinstance(p, StarItem):
                     if not self.transformed:
                         self.transform()
+                    self.transformed = True
 
                 if vel_x > 0 and p.collides:
                     self.rect.right = p.rect.left

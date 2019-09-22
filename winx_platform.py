@@ -12,17 +12,17 @@ def main(width: int = None, height: int = None):
     pygame.display.set_caption("Winx Club")
 
     if width is None or height is None:
-        screen_window = pygame.display.set_mode((0, 0), pygame.FULLSCREEN)
+        # screen_window = pygame.display.set_mode((0, 0), pygame.FULLSCREEN)
         # screen_window = pygame.display.set_mode((800, 600))
-        # screen_window = pygame.display.set_mode((1280, 720))
+        screen_window = pygame.display.set_mode((1280, 720))
     else:
         screen_window = pygame.display.set_mode((width, height))
-    game_screen = Layout(screen_window, allow_rescale=True)
+    layout = Layout(screen_window, allow_rescale=True)
 
     levels_loaded = [
-        GenericWinxLevel(game_screen, "levels/level_txt/level_01.txt"),
-        GenericWinxLevel(game_screen, "levels/level_txt/level_02.txt"),
-        GenericWinxLevel(game_screen, "levels/level_txt/level_03.txt")
+        GenericWinxLevel(layout, "levels/level_txt/level_01.txt"),
+        GenericWinxLevel(layout, "levels/level_txt/level_02.txt"),
+        GenericWinxLevel(layout, "levels/level_txt/level_03.txt")
     ]
 
     done = False

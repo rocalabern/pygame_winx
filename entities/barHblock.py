@@ -29,10 +29,14 @@ def draw_procedural(TILE_X, TILE_Y):
 
 class BarHBlock(BarBlock):
 
-    collides = False
-    has_grip = True
-
     def __init__(self, level_loaded: Level, x, y):
         Entity.__init__(self)
+        self.collides = False
+        self.has_grip = True
+        self.item = False
+        self.collectable = False
+        self.transformed = False
+        self.fly = False
+
         self.image = draw_procedural()
         self.rect = Rect(x, y, constants.TILE_X, constants.TILE_Y)

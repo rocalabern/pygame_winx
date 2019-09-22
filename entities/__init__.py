@@ -12,7 +12,7 @@ from .goalblock_right import GoalBlockRight
 
 from .staritem import StarItem
 
-from .tritannus import Tritannus
+from .ghost import Ghost
 
 from .player import Player
 

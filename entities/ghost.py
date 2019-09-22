@@ -1,5 +1,6 @@
 import pygame
 from pygame import *
+import numpy as np
 
 from levels import Level
 from lib import *
@@ -15,18 +16,21 @@ from entities import GoalBlockRight
 from entities import StarItem
 
 
-def draw_player(TILE_X, TILE_Y, color, image_file=None, flip=False, force_background=False):
+def draw_player(TILE_X, TILE_Y, bg_color, image_file=None, flip=False, force_background=False):
     temp_image = Surface((TILE_X, TILE_Y))
-    temp = pygame.image.load('images/winx_raw/tritannus_01.png')
-    if flip:
-        temp = pygame.transform.flip(temp, True, False)
-    temp = pygame.transform.scale(temp, (TILE_X, TILE_Y))
-    temp_image = temp   # without background
+    if image_file is not None:
+        temp = pygame.image.load(image_file)
+        if flip:
+            temp = pygame.transform.flip(temp, True, False)
+        temp = pygame.transform.scale(temp, (TILE_X, TILE_Y))
+        temp_image = temp   # without background
+    else:
+        temp_image.fill(Color(bg_color))
     temp_image.convert()
     return temp_image
 
 
-class Tritannus(Entity):
+class Ghost(Entity):
 
     collides = True
     has_grip = False
@@ -36,7 +40,7 @@ class Tritannus(Entity):
             self,
             level_loaded: Level,
             x, y, name,
-            color="#000000",
+            bg_color="#000000",
             image_file=None,
             image_transform=None,
             flip=False,
@@ -44,9 +48,16 @@ class Tritannus(Entity):
             jump_sound=None
     ):
         Entity.__init__(self)
+        self.collides = False
+        self.has_grip = False
+        self.item = False
+        self.collectable = False
+        self.transformed = False
+        self.fly = False
+
         self.level_loaded = level_loaded
         self.name = name
-        self.color = color
+        self.bg_color = bg_color
         self.xvel = 0
         self.yvel = 0
         self.onGround = False
@@ -55,7 +66,7 @@ class Tritannus(Entity):
         self.on_goal = False
         self.image = draw_player(
             level_loaded.TILE_X, level_loaded.TILE_Y,
-            self.color, image_file, flip, force_background
+            self.bg_color, image_file, flip, force_background
         )
         self.image_transform = image_transform
         self.rect = Rect(x, y, level_loaded.TILE_X-2, level_loaded.TILE_Y)
@@ -73,14 +84,14 @@ class Tritannus(Entity):
         temp_image.convert()
         self.image = temp_image
 
-    def update(self, platforms, p1, p2):
+    def update(self, platforms, players):
 
-        dist1 = (self.rect.left - p1.rect.left) ** 2 + (self.rect.top - p1.rect.top) ** 2
-        dist2 = (self.rect.left - p2.rect.left) ** 2 + (self.rect.top - p2.rect.top) ** 2
-        if dist1<dist2:
-            p = p1
-        else:
-            p = p2
+        min_dist = np.inf
+        for p1 in players:
+            dist1 = (self.rect.left - p1.rect.left) ** 2 + (self.rect.top - p1.rect.top) ** 2
+            if dist1 < min_dist:
+                p = p1
+                min_dist = dist1
 
         self.xvel = -sign(self.rect.left - p.rect.left) * self.level_loaded.ENEMY_VELOCITY_MOVEMENT
         self.yvel = -sign(self.rect.top - p.rect.top) * self.level_loaded.ENEMY_VELOCITY_MOVEMENT

@@ -12,4 +12,5 @@ _ / Bar H (lower bar) [H]
 1 / Y : Player 1 [Y]
 2 / X : Player 2 [X]
 
-T : Tritannus [T]
+t : Tritannus [t]
+g : Ghost [g]

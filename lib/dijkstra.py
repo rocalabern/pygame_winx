@@ -7,11 +7,18 @@ class Dijkstra:
     def __init__(self, maze):
         self.maze = maze
         self.neighbours = [[-1, 0], [1, 0], [0, -1], [0, 1]]
-        self.path = []
+        self.blocked_elements = [1]
+        self.all_paths = []
         for i in range(0, maze.shape[0]):
-            self.path.append([])
+            self.all_paths.append([])
             for j in range(0, maze.shape[1]):
-                self.path[i].append((i, j))
+                self.all_paths[i].append((i, j))
+
+    def set_blocked_elements(self, blocked_elements):
+        self.blocked_elements = blocked_elements
+
+    def set_neighbours(self, neighbours):
+        self.neighbours = neighbours
 
     def set_neighbours_arrows(self):
         self.neighbours = [[-1, 0], [1, 0], [0, -1], [0, 1]]
@@ -20,18 +27,14 @@ class Dijkstra:
         self.neighbours = [[-1, 0], [1, 0], [0, -1], [0, 1], [1, 1], [1, -1], [-1, -1], [-1, 1]]
 
     def shortest_path(self, ini, end, max_distance=np.inf):
+        min_dist = np.full(self.maze.shape, np.inf)
+
         ini = Coord(ini)
-        end = Coord(end)
+        list_to_explore = [ini]
+        min_dist[ini.x, ini.y] = 0
 
-        dist = np.full(self.maze.shape, np.inf)
-
-        # we start here, thus a distance of 0
-        open_list = [ini]
-        dist[ini.x, ini.y] = 0
-
-        # (x,y) offsets from current cell
-        while open_list:
-            current_coord = open_list.pop(0)
+        while list_to_explore:
+            current_coord = list_to_explore.pop(0)
 
             for neighbour in self.neighbours:
                 next_coord = current_coord + neighbour
@@ -41,19 +44,25 @@ class Dijkstra:
                         or next_coord.y >= self.maze.shape[1]:
                     continue
 
-                if self.maze[next_coord.x, next_coord.y] == 1:
+                if self.maze[next_coord.x, next_coord.y] == self.blocked_elements:
                     continue
 
-                new_dist = dist[current_coord.x, current_coord.y] + np.sqrt(neighbour[0]**2+neighbour[1]**2)
+                new_dist = min_dist[current_coord.x, current_coord.y] + np.sqrt(neighbour[0]**2+neighbour[1]**2)
                 if new_dist > max_distance:
                     continue
 
-                if new_dist < dist[next_coord.x, next_coord.y]:
-                    dist[next_coord.x, next_coord.y] = new_dist
-                    self.path[next_coord.x][next_coord.y] = current_coord
-                    open_list.append(next_coord)
+                if new_dist < min_dist[next_coord.x, next_coord.y]:
+                    min_dist[next_coord.x, next_coord.y] = new_dist
+                    self.all_paths[next_coord.x][next_coord.y] = current_coord
+                    list_to_explore.append(next_coord)
 
-        return dist
+        path = [Coord(end)]
+        if self.all_paths[Coord(end).x][Coord(end).y].x is not Coord(end).x or \
+                self.all_paths[Coord(end).x][Coord(end).y].y is not Coord(end).y:
+            while ini.x is not path[0].x or ini.y is not path[0].y:
+                path = [self.all_paths[path[0].x][path[0].y]] + path
+
+        return path
 
 
 if __name__ == "__main__":
@@ -70,13 +79,11 @@ if __name__ == "__main__":
 
     dist = self.shortest_path((x_ini, y_ini), (x_end, y_end))
 
-    dist[10,]
-
     x_pos = x_end
     y_pos = y_end
     print(str(x_pos) + " : " + str(y_pos))
     while x_ini is not x_pos or y_ini is not y_pos:
-        x_pos, y_pos = self.path[x_pos][y_pos]
+        x_pos, y_pos = self.all_paths[x_pos][y_pos]
         print(str(x_pos) + " : " + str(y_pos))
 
 
