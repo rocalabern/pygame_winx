@@ -31,12 +31,15 @@ def test_02():
     pygame.init()
     pygame.display.set_caption("Winx Club")
 
+    # Debug params
+    my_font = pygame.font.SysFont("Some font", 64)
+
     # screen_window = pygame.display.set_mode((800, 600))
     screen_window = pygame.display.set_mode((1280, 720))
     # layout = Layout(screen_window, allow_rescale=True)
     layout = Layout(screen_window, allow_rescale=False)
 
-    level_loaded = GenericWinxLevel(layout, "levels/level_txt/level_02.txt", gravity=3)
+    level_loaded = GenericWinxLevel(layout, "levels/level_txt/level_01.txt", gravity=3)
 
     layout.screen_desktop.fill(Color("#AAAAAA"))
     layout.screen_game.fill((0, 0, 0))
@@ -109,17 +112,37 @@ def test_02():
                     if isinstance(p, GoalBlockLeft) or isinstance(p, GoalBlockRight):
                         p.set_draw_procedural(level_loaded.TILE_X, level_loaded.TILE_Y, p.image_empty)
 
-        self = enemies[0]
-        p = players[0]
-        x_end = int((p.rect.top - self.level_loaded.offset_w) / self.level_loaded.TILE_X)
-        y_end = int((p.rect.left - self.level_loaded.offset_h) / self.level_loaded.TILE_Y)
-        x_ini = int((self.rect.top - self.level_loaded.offset_w) / self.level_loaded.TILE_X)
-        y_ini = int((self.rect.left - self.level_loaded.offset_h) / self.level_loaded.TILE_Y)
-
         level_loaded.print_background()
         entities.draw(layout.screen_game)
-        # self.layout.update(player_p2.rect, zoom=2.0)
+        # for e in enemies:
+        #     if e.name == "Tritannus":
+        #         break
+        # if e.name == "Tritannus":
+        #     self = e
+        #     p = self.target_player
+        #     path = self.path
+        #     x_end = int((p.rect.top - self.level_loaded.offset_w) / self.level_loaded.TILE_X)
+        #     y_end = int((p.rect.left - self.level_loaded.offset_h) / self.level_loaded.TILE_Y)
+        #     x_ini = int((self.rect.top - self.level_loaded.offset_w) / self.level_loaded.TILE_X)
+        #     y_ini = int((self.rect.left - self.level_loaded.offset_h) / self.level_loaded.TILE_Y)
+        #     i_cell = 0
+        #     for cell in path:
+        #         x_pos = int(self.level_loaded.offset_w + (cell.y + 0.5) * self.level_loaded.TILE_X)
+        #         y_pos = int(self.level_loaded.offset_h + (cell.x + 1.5) * self.level_loaded.TILE_Y)
+        #         text = my_font.render(str(i_cell), 8, (237, 210, 36))
+        #         layout.screen_game.blit(text, (x_pos, y_pos))
+        #         i_cell = i_cell + 1
+
+        for i_row in range(0, level_loaded.TILE_Y_NUM):
+            for i_col in range(0, level_loaded.TILE_X_NUM):
+                val = level_loaded.level_matrix[i_row][i_col]
+                x_pos = int(level_loaded.offset_w + (i_row + 0.5) * level_loaded.TILE_X)
+                y_pos = int(level_loaded.offset_h + (i_col + 1.5) * level_loaded.TILE_Y)
+                text = my_font.render(str(int(val)), 8, (237, 210, 36))
+                layout.screen_game.blit(text, (x_pos, y_pos))
+
         layout.update()
+        # self.layout.update(player_p2.rect, zoom=2.0)
         clock.tick(30)
 
     print("Level finished")

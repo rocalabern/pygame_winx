@@ -44,7 +44,7 @@ class Dijkstra:
                         or next_coord.y >= self.maze.shape[1]:
                     continue
 
-                if self.maze[next_coord.x, next_coord.y] == self.blocked_elements:
+                if self.maze[next_coord.x, next_coord.y] in self.blocked_elements:
                     continue
 
                 new_dist = min_dist[current_coord.x, current_coord.y] + np.sqrt(neighbour[0]**2+neighbour[1]**2)

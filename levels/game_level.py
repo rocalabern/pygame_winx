@@ -21,6 +21,14 @@ def load_level(level_loaded: Level):
     enemies = []
     players = []
 
+    # block     : -1
+    # empty     :  0
+    # ground    :  1
+    # stairs    :  2
+    # bar       :  3
+    # fly       :  4
+
+
     # build the level
     y = offset_h
     for i_row in range(0, level_loaded.TILE_Y_NUM):
@@ -129,12 +137,8 @@ def load_level(level_loaded: Level):
     for i_row in range(0, level_loaded.TILE_Y_NUM-1):
         for i_col in range(0, level_loaded.TILE_X_NUM):
             if i_row < level_loaded.TILE_Y_NUM-1:
-                if level_loaded.level_matrix[i_row+1][i_col] == -1:
-                    level_loaded.level_matrix[i_row][i_col] = 1
-                if level_loaded.level_matrix[i_row + 1][i_col] == 2:
-                    level_loaded.level_matrix[i_row][i_col] = 1
-                if level_loaded.level_matrix[i_row + 1][i_col] == 3:
-                    level_loaded.level_matrix[i_row][i_col] = 3
+                if level_loaded.level_matrix[i_row+1][i_col] == 0:
+                    level_loaded.level_matrix[i_row][i_col] = 4
 
     for p in players:
         entities.add(p)

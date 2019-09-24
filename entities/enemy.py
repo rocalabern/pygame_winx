@@ -59,6 +59,7 @@ class Enemy(Entity):
         self.transformed = False
         self.fly = False
 
+        self.target_player = None
         self.path = None
         self.path_last_calc = pygame.time.get_ticks()
 
@@ -129,6 +130,7 @@ class Enemy(Entity):
                 p = p1
                 min_dist = dist1
 
+        self.target_player = p
         x_end = int((p.rect.top - self.level_loaded.offset_w) / self.level_loaded.TILE_X)
         y_end = int((p.rect.left - self.level_loaded.offset_h) / self.level_loaded.TILE_Y)
         x_ini = int((self.rect.top - self.level_loaded.offset_w) / self.level_loaded.TILE_X)
@@ -136,11 +138,10 @@ class Enemy(Entity):
 
         maze = self.level_loaded.level_matrix
         maze_dijkstra = Dijkstra(maze)
-        maze_dijkstra.blocked_elements = [-1]
+        maze_dijkstra.blocked_elements = [-1, 4]
 
         time_last_calc = (pygame.time.get_ticks() - self.path_last_calc) / 1000
-        if self.path is None or time_last_calc > 2:
-            print((pygame.time.get_ticks() - self.path_last_calc) / 1000)
+        if self.path is None or time_last_calc > 0.8:
             self.path = maze_dijkstra.shortest_path((x_ini, y_ini), (x_end, y_end))
             self.path_last_calc = pygame.time.get_ticks()
 
