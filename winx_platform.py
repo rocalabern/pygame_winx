@@ -20,7 +20,7 @@ def main(width: int = None, height: int = None):
     layout = Layout(screen_window, allow_rescale=True)
 
     levels_loaded = [
-        GenericWinxLevel(layout, "levels/level_txt/level_01.txt"),
+        # GenericWinxLevel(layout, "levels/level_txt/level_01.txt"),
         GenericWinxLevel(layout, "levels/level_txt/level_02.txt"),
         GenericWinxLevel(layout, "levels/level_txt/level_03.txt")
     ]

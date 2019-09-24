@@ -3,7 +3,30 @@ from levels.game_level import load_level, GoalBlockLeft, GoalBlockRight
 from levels.level_loaders import GenericWinxLevel
 from lib import *
 
-if __name__ == "__main__":
+
+def test_01():
+    self = Dijkstra(np.zeros((20, 20)))
+
+    self.maze = np.zeros((20, 20))
+    for i in range(4, 15):
+        self.maze[10, i] = 1
+
+    x_ini = 1
+    y_ini = 10
+    x_end = 18
+    y_end = 10
+
+    path = self.shortest_path((x_ini, y_ini), (x_end, y_end))
+
+    x_pos = x_end
+    y_pos = y_end
+    print(str(x_pos) + " : " + str(y_pos))
+    while x_ini is not x_pos or y_ini is not y_pos:
+        x_pos, y_pos = self.all_paths[x_pos][y_pos]
+        print(str(x_pos) + " : " + str(y_pos))
+
+
+def test_02():
     pygame.mixer.pre_init(48000, -16, 2, 2048)
     pygame.init()
     pygame.display.set_caption("Winx Club")
@@ -13,7 +36,7 @@ if __name__ == "__main__":
     # layout = Layout(screen_window, allow_rescale=True)
     layout = Layout(screen_window, allow_rescale=False)
 
-    level_loaded = GenericWinxLevel(layout, "levels/level_txt/level_01.txt", gravity=3)
+    level_loaded = GenericWinxLevel(layout, "levels/level_txt/level_02.txt", gravity=3)
 
     layout.screen_desktop.fill(Color("#AAAAAA"))
     layout.screen_game.fill((0, 0, 0))
@@ -86,31 +109,23 @@ if __name__ == "__main__":
                     if isinstance(p, GoalBlockLeft) or isinstance(p, GoalBlockRight):
                         p.set_draw_procedural(level_loaded.TILE_X, level_loaded.TILE_Y, p.image_empty)
 
+        self = enemies[0]
+        p = players[0]
+        x_end = int((p.rect.top - self.level_loaded.offset_w) / self.level_loaded.TILE_X)
+        y_end = int((p.rect.left - self.level_loaded.offset_h) / self.level_loaded.TILE_Y)
+        x_ini = int((self.rect.top - self.level_loaded.offset_w) / self.level_loaded.TILE_X)
+        y_ini = int((self.rect.left - self.level_loaded.offset_h) / self.level_loaded.TILE_Y)
+
         level_loaded.print_background()
         entities.draw(layout.screen_game)
-        # self.layout.update(player_p2.rect, zoom=1.2)
+        # self.layout.update(player_p2.rect, zoom=2.0)
         layout.update()
-        clock.tick(60)
+        clock.tick(30)
 
     print("Level finished")
 
-    self = Dijkstra(np.zeros((20, 20)))
 
-    self.maze = np.zeros((20, 20))
-    for i in range(4, 15):
-        self.maze[10, i] = 1
-
-    x_ini = 1
-    y_ini = 10
-    x_end = 18
-    y_end = 10
-
-    path = self.shortest_path((x_ini, y_ini), (x_end, y_end))
-
-    x_pos = x_end
-    y_pos = y_end
-    print(str(x_pos) + " : " + str(y_pos))
-    while x_ini is not x_pos or y_ini is not y_pos:
-        x_pos, y_pos = self.all_paths[x_pos][y_pos]
-        print(str(x_pos) + " : " + str(y_pos))
+if __name__ == "__main__":
+    # test_01()
+    test_02()
 

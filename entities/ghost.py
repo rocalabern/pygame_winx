@@ -16,7 +16,7 @@ from entities import GoalBlockRight
 from entities import StarItem
 
 
-def draw_player(TILE_X, TILE_Y, bg_color, image_file=None, flip=False, force_background=False):
+def draw_player(TILE_X, TILE_Y, bg_color, image_file=None, flip=False):
     temp_image = Surface((TILE_X, TILE_Y))
     if image_file is not None:
         temp = pygame.image.load(image_file)
@@ -64,10 +64,16 @@ class Ghost(Entity):
         self.onStairs = False
         self.onBar = False
         self.on_goal = False
-        self.image = draw_player(
+        self.image_file = image_file
+        self.image_right = draw_player(
             level_loaded.TILE_X, level_loaded.TILE_Y,
-            self.bg_color, image_file, flip, force_background
+            self.bg_color, image_file, True
         )
+        self.image_left = draw_player(
+            level_loaded.TILE_X, level_loaded.TILE_Y,
+            self.bg_color, image_file, False
+        )
+        self.image = self.image_right
         self.image_transform = image_transform
         self.rect = Rect(x, y, level_loaded.TILE_X-2, level_loaded.TILE_Y)
         if jump_sound is None:
@@ -93,8 +99,19 @@ class Ghost(Entity):
                 p = p1
                 min_dist = dist1
 
-        self.xvel = -sign(self.rect.left - p.rect.left) * self.level_loaded.ENEMY_VELOCITY_MOVEMENT
-        self.yvel = -sign(self.rect.top - p.rect.top) * self.level_loaded.ENEMY_VELOCITY_MOVEMENT
+        if abs(self.rect.left - p.rect.left)<10:
+            self.xvel = 0
+        else:
+            self.xvel = -sign(self.rect.left - p.rect.left) * self.level_loaded.ENEMY_VELOCITY_MOVEMENT
+        if abs(self.rect.top - p.rect.top)<10:
+            self.yvel = 0
+        else:
+            self.yvel = -sign(self.rect.top - p.rect.top) * self.level_loaded.ENEMY_VELOCITY_MOVEMENT
+
+        if self.xvel > 0:
+            self.image = self.image_right
+        else:
+            self.image = self.image_left
 
         # increment in x direction
         self.rect.left += self.xvel

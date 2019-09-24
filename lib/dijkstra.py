@@ -12,7 +12,7 @@ class Dijkstra:
         for i in range(0, maze.shape[0]):
             self.all_paths.append([])
             for j in range(0, maze.shape[1]):
-                self.all_paths[i].append((i, j))
+                self.all_paths[i].append(Coord((i, j)))
 
     def set_blocked_elements(self, blocked_elements):
         self.blocked_elements = blocked_elements

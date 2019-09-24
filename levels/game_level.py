@@ -75,7 +75,7 @@ def load_level(level_loaded: Level):
                     level_loaded,
                     x, y, "Ghost",
                     bg_color="#72A877",
-                    image_file='images/winx_raw/tritannus_01.png',
+                    image_file='images/sprites/characters/enemies/ghost.png',
                     flip=True,
                     jump_sound=constants.PLAYER_P1_JUMP
                 )
@@ -227,9 +227,9 @@ class GameLevel:
 
             self.level_loaded.print_background()
             entities.draw(self.layout.screen_game)
-            # self.layout.update(player_p2.rect, zoom=1.2)
+            # self.layout.update(player_p2.rect, zoom=2.0)
             self.layout.update()
-            clock.tick(60)
+            clock.tick(30)
 
         print("Level finished")
         if not skip:

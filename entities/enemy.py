@@ -59,6 +59,9 @@ class Enemy(Entity):
         self.transformed = False
         self.fly = False
 
+        self.path = None
+        self.path_last_calc = pygame.time.get_ticks()
+
         self.name = name
         self.level_loaded = level_loaded
 
@@ -135,12 +138,42 @@ class Enemy(Entity):
         maze_dijkstra = Dijkstra(maze)
         maze_dijkstra.blocked_elements = [-1]
 
-        # path = maze_dijkstra.shortest_path((x_ini, y_ini), (x_end, y_end))
+        time_last_calc = (pygame.time.get_ticks() - self.path_last_calc) / 1000
+        if self.path is None or time_last_calc > 2:
+            print((pygame.time.get_ticks() - self.path_last_calc) / 1000)
+            self.path = maze_dijkstra.shortest_path((x_ini, y_ini), (x_end, y_end))
+            self.path_last_calc = pygame.time.get_ticks()
 
-        up = False
-        down = False
-        left = True
-        right = False
+        if len(self.path) > 1:
+            if self.path[0].x < self.path[1].x:
+                up = True
+                down = False
+            elif self.path[0].x > self.path[1].x:
+                up = False
+                down = True
+            else:
+                up = False
+                down = False
+
+            if self.path[0].y < self.path[1].y:
+                right = True
+                left = False
+            elif self.path[0].y > self.path[1].y:
+                right = False
+                left = True
+            else:
+                right = False
+                left = False
+        else:
+            up = False
+            down = False
+            right = False
+            left = False
+
+        # print("---------------------------------")
+        # for c in path:
+        #     print(str(c))
+        # print("---------------------------------")
 
         if self.onStairs:
             self.vel_y = 0
