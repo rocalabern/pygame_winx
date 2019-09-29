@@ -34,44 +34,44 @@ def load_level(level_loaded: Level):
     for i_row in range(0, level_loaded.TILE_Y_NUM):
         x = offset_w
         level_row = level_loaded.level[i_row]
-        for i_col in range(0, level_loaded.TILE_X_NUM):
-            level_block = level_row[i_col]
-            level_loaded.level_matrix[i_row][i_col] = 0
+        for j_col in range(0, level_loaded.TILE_X_NUM):
+            level_block = level_row[j_col]
+            level_loaded.level_matrix[i_row][j_col] = 0
             if level_block == "▉" or level_block == "P":
                 e = PlatformBlock(level_loaded, x, y)
                 platforms.append(e)
                 entities.add(e)
-                level_loaded.level_matrix[i_row][i_col] = -1
+                level_loaded.level_matrix[i_row][j_col] = -1
             if level_block == "╬" or level_block == "E":
                 e = StairsBlock(level_loaded, x, y)
                 platforms.append(e)
                 entities.add(e)
-                level_loaded.level_matrix[i_row][i_col] = 2
+                level_loaded.level_matrix[i_row][j_col] = 2
             if level_block == "-" or level_block == "B":
                 e = BarBlock(level_loaded, x, y)
                 platforms.append(e)
                 entities.add(e)
-                level_loaded.level_matrix[i_row][i_col] = 3
+                level_loaded.level_matrix[i_row][j_col] = 3
             if level_block == "_" or level_block == "H":
                 e = BarHBlock(x, y)
                 platforms.append(e)
                 entities.add(e)
-                level_loaded.level_matrix[i_row][i_col] = 3
+                level_loaded.level_matrix[i_row][j_col] = 3
             if level_block == "⊟" or level_block == "G":
                 e = GoalBlock(level_loaded, x, y)
                 platforms.append(e)
                 entities.add(e)
-                level_loaded.level_matrix[i_row][i_col] = -1
+                level_loaded.level_matrix[i_row][j_col] = -1
             if level_block == "⊏" or level_block == "L":
                 e = GoalBlockLeft(level_loaded, x, y)
                 platforms.append(e)
                 entities.add(e)
-                level_loaded.level_matrix[i_row][i_col] = -1
+                level_loaded.level_matrix[i_row][j_col] = -1
             if level_block == "⊐" or level_block == "R":
                 e = GoalBlockRight(level_loaded, x, y)
                 platforms.append(e)
                 entities.add(e)
-                level_loaded.level_matrix[i_row][i_col] = -1
+                level_loaded.level_matrix[i_row][j_col] = -1
 
             if level_block == "⭐" or level_block == "S":
                 e = StarItem(level_loaded, x, y)
@@ -108,8 +108,10 @@ def load_level(level_loaded: Level):
                     x, y, "Y",
                     K_UP, K_DOWN, K_RIGHT, K_LEFT,
                     constants.PLAYER_P1_COLOR_BG,
-                    constants.IMAGE_P1,
-                    constants.IMAGE_P1_TRANSFORMED,
+                    'images/winx_raw/tritannus_01.png',
+                    'images/winx_raw/tritannus_01.png',
+                    # constants.IMAGE_P1,
+                    # constants.IMAGE_P1_TRANSFORMED,
                     flip=True,
                     jump_sound=constants.PLAYER_P1_JUMP
                 )
@@ -134,11 +136,14 @@ def load_level(level_loaded: Level):
             x += tile_x
         y += tile_y
 
-    for i_row in range(0, level_loaded.TILE_Y_NUM-1):
-        for i_col in range(0, level_loaded.TILE_X_NUM):
+    for i_row in range(0, level_loaded.TILE_Y_NUM-2):
+        for j_col in range(0, level_loaded.TILE_X_NUM):
             if i_row < level_loaded.TILE_Y_NUM-1:
-                if level_loaded.level_matrix[i_row+1][i_col] == 0:
-                    level_loaded.level_matrix[i_row][i_col] = 4
+                if \
+                        level_loaded.level_matrix[i_row+2][j_col] in [0, 4] and \
+                        level_loaded.level_matrix[i_row+1][j_col] in [0, 4] and \
+                        level_loaded.level_matrix[i_row][j_col] == 0:
+                    level_loaded.level_matrix[i_row][j_col] = 4
 
     for p in players:
         entities.add(p)

@@ -16,7 +16,7 @@ class GenericWinxLevel(Level):
             velocity_jump=40,
             velocity_fly=4,
             velocity_fly_max=48,
-            enemy_velocity_movement=4,
+            enemy_velocity_movement=8,
             num_players: int = 0
     ):
         super().__init__(

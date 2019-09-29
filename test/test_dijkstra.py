@@ -32,7 +32,9 @@ def test_02():
     pygame.display.set_caption("Winx Club")
 
     # Debug params
-    my_font = pygame.font.SysFont("Some font", 64)
+    my_font_128 = pygame.font.SysFont("Some font", 128)
+    my_font_64 = pygame.font.SysFont("Some font", 64)
+    my_font_42 = pygame.font.SysFont("Some font", 42)
 
     # screen_window = pygame.display.set_mode((800, 600))
     screen_window = pygame.display.set_mode((1280, 720))
@@ -114,35 +116,36 @@ def test_02():
 
         level_loaded.print_background()
         entities.draw(layout.screen_game)
-        # for e in enemies:
-        #     if e.name == "Tritannus":
-        #         break
-        # if e.name == "Tritannus":
-        #     self = e
-        #     p = self.target_player
-        #     path = self.path
-        #     x_end = int((p.rect.top - self.level_loaded.offset_w) / self.level_loaded.TILE_X)
-        #     y_end = int((p.rect.left - self.level_loaded.offset_h) / self.level_loaded.TILE_Y)
-        #     x_ini = int((self.rect.top - self.level_loaded.offset_w) / self.level_loaded.TILE_X)
-        #     y_ini = int((self.rect.left - self.level_loaded.offset_h) / self.level_loaded.TILE_Y)
-        #     i_cell = 0
-        #     for cell in path:
-        #         x_pos = int(self.level_loaded.offset_w + (cell.y + 0.5) * self.level_loaded.TILE_X)
-        #         y_pos = int(self.level_loaded.offset_h + (cell.x + 1.5) * self.level_loaded.TILE_Y)
-        #         text = my_font.render(str(i_cell), 8, (237, 210, 36))
-        #         layout.screen_game.blit(text, (x_pos, y_pos))
-        #         i_cell = i_cell + 1
-
-        for i_row in range(0, level_loaded.TILE_Y_NUM):
-            for i_col in range(0, level_loaded.TILE_X_NUM):
-                val = level_loaded.level_matrix[i_row][i_col]
-                x_pos = int(level_loaded.offset_w + (i_row + 0.5) * level_loaded.TILE_X)
-                y_pos = int(level_loaded.offset_h + (i_col + 1.5) * level_loaded.TILE_Y)
-                text = my_font.render(str(int(val)), 8, (237, 210, 36))
+        for e in enemies:
+            if e.name == "Tritannus":
+                break
+        if e.name == "Tritannus":
+            self = e
+            p = self.target_player
+            path = self.path
+            x_end = int((p.rect.left+5 - self.level_loaded.offset_w) / self.level_loaded.TILE_X)
+            y_end = int((p.rect.top+5 - self.level_loaded.offset_h) / self.level_loaded.TILE_Y)
+            x_ini = int((self.rect.left+5 - self.level_loaded.offset_w) / self.level_loaded.TILE_X)
+            y_ini = int((self.rect.top+5 - self.level_loaded.offset_h) / self.level_loaded.TILE_Y)
+            i_cell = 0
+            for cell in path:
+                x_pos = int(self.level_loaded.offset_w + (cell.x + 0.3) * self.level_loaded.TILE_X)
+                y_pos = int(self.level_loaded.offset_h + (cell.y + 0.3) * self.level_loaded.TILE_Y)
+                text = my_font_64.render(str(i_cell), 8, (237, 210, 36))
                 layout.screen_game.blit(text, (x_pos, y_pos))
+                i_cell = i_cell + 1
+
+        # for i_row in range(0, level_loaded.TILE_Y_NUM):
+        #     for i_col in range(0, level_loaded.TILE_X_NUM):
+        #         str_text = str(int(level_loaded.level_matrix[i_row][i_col]))
+        #         # str_text = str(i_row) + "-" + str(i_col)
+        #         x_pos = int(level_loaded.offset_w + (i_col + 0.3) * level_loaded.TILE_X)
+        #         y_pos = int(level_loaded.offset_h + (i_row + 0.3) * level_loaded.TILE_Y)
+        #         text = my_font_42.render(str_text, 8, (237, 210, 36))
+        #         layout.screen_game.blit(text, (x_pos, y_pos))
 
         layout.update()
-        # self.layout.update(player_p2.rect, zoom=2.0)
+        # layout.update(player_p2.rect, zoom=8.0)
         clock.tick(30)
 
     print("Level finished")

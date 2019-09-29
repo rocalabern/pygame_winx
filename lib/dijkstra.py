@@ -31,7 +31,7 @@ class Dijkstra:
 
         ini = Coord(ini)
         list_to_explore = [ini]
-        min_dist[ini.x, ini.y] = 0
+        min_dist[ini.y, ini.x] = 0
 
         while list_to_explore:
             current_coord = list_to_explore.pop(0)
@@ -39,28 +39,30 @@ class Dijkstra:
             for neighbour in self.neighbours:
                 next_coord = current_coord + neighbour
                 if next_coord.x < 0 \
-                        or next_coord.x >= self.maze.shape[0] \
+                        or next_coord.x >= self.maze.shape[1] \
                         or next_coord.y < 0 \
-                        or next_coord.y >= self.maze.shape[1]:
+                        or next_coord.y >= self.maze.shape[0]:
                     continue
 
-                if self.maze[next_coord.x, next_coord.y] in self.blocked_elements:
+                if self.maze[next_coord.y, next_coord.x] in self.blocked_elements:
                     continue
 
-                new_dist = min_dist[current_coord.x, current_coord.y] + np.sqrt(neighbour[0]**2+neighbour[1]**2)
+                new_dist = min_dist[current_coord.y, current_coord.x] + np.sqrt(neighbour[0]**2+neighbour[1]**2)
                 if new_dist > max_distance:
                     continue
 
-                if new_dist < min_dist[next_coord.x, next_coord.y]:
-                    min_dist[next_coord.x, next_coord.y] = new_dist
-                    self.all_paths[next_coord.x][next_coord.y] = current_coord
+                if new_dist < min_dist[next_coord.y, next_coord.x]:
+                    min_dist[next_coord.y, next_coord.x] = new_dist
+                    self.all_paths[next_coord.y][next_coord.x] = current_coord
                     list_to_explore.append(next_coord)
 
         path = [Coord(end)]
-        if self.all_paths[Coord(end).x][Coord(end).y].x is not Coord(end).x or \
-                self.all_paths[Coord(end).x][Coord(end).y].y is not Coord(end).y:
+        if self.all_paths[Coord(end).y][Coord(end).x].x is not Coord(end).x or \
+                self.all_paths[Coord(end).y][Coord(end).x].y is not Coord(end).y:
             while ini.x is not path[0].x or ini.y is not path[0].y:
-                path = [self.all_paths[path[0].x][path[0].y]] + path
+                if self.all_paths[path[0].y][path[0].x] == path[0]:
+                    break
+                path = [self.all_paths[path[0].y][path[0].x]] + path
 
         return path
 

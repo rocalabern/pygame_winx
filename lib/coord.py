@@ -4,23 +4,23 @@ import operator
 class Coord:
     def __init__(self, pos):
         if isinstance(pos, Coord):
-            self.pos = (pos.x, pos.y)
-            self.x = pos.x
+            self.pos = (pos.y, pos.x)
             self.y = pos.y
+            self.x = pos.x
         else:
             self.pos = pos
-            self.x = pos[0]
-            self.y = pos[1]
+            self.y = pos[0]
+            self.x = pos[1]
 
     def __setattr__(self, name, value):
         self.__dict__[name] = value
         if name == "x":
-            self.__dict__["pos"] = (value, self.pos[1])
-        elif name == "y":
             self.__dict__["pos"] = (self.pos[0], value)
+        elif name == "y":
+            self.__dict__["pos"] = (value, self.pos[1])
         elif name == "pos":
-            self.__dict__["x"] = self.pos[0]
-            self.__dict__["y"] = self.pos[1]
+            self.__dict__["y"] = self.pos[0]
+            self.__dict__["x"] = self.pos[1]
 
     def __getitem__(self, index):
         if index == 0:

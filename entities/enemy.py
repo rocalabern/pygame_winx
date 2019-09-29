@@ -131,10 +131,11 @@ class Enemy(Entity):
                 min_dist = dist1
 
         self.target_player = p
-        x_end = int((p.rect.top - self.level_loaded.offset_w) / self.level_loaded.TILE_X)
-        y_end = int((p.rect.left - self.level_loaded.offset_h) / self.level_loaded.TILE_Y)
-        x_ini = int((self.rect.top - self.level_loaded.offset_w) / self.level_loaded.TILE_X)
-        y_ini = int((self.rect.left - self.level_loaded.offset_h) / self.level_loaded.TILE_Y)
+
+        x_end = int((p.rect.left - self.level_loaded.offset_h) / self.level_loaded.TILE_X)
+        y_end = 1+int((p.rect.top - self.level_loaded.offset_w) / self.level_loaded.TILE_Y)
+        x_ini = int((self.rect.left - self.level_loaded.offset_h) / self.level_loaded.TILE_X)
+        y_ini = 1+int((self.rect.top - self.level_loaded.offset_w) / self.level_loaded.TILE_Y)
 
         maze = self.level_loaded.level_matrix
         maze_dijkstra = Dijkstra(maze)
@@ -142,34 +143,62 @@ class Enemy(Entity):
 
         time_last_calc = (pygame.time.get_ticks() - self.path_last_calc) / 1000
         if self.path is None or time_last_calc > 0.8:
-            self.path = maze_dijkstra.shortest_path((x_ini, y_ini), (x_end, y_end))
+            self.path = maze_dijkstra.shortest_path((y_ini, x_ini), (y_end, x_end))
             self.path_last_calc = pygame.time.get_ticks()
 
         if len(self.path) > 1:
-            if self.path[0].x < self.path[1].x:
+            if self.path[1].y < self.path[0].y:
                 up = True
                 down = False
-            elif self.path[0].x > self.path[1].x:
+            elif self.path[0].y < self.path[1].y:
+                up = False
+                down = True
+            else:
+                if p.rect.top < self.rect.top:
+                    up = True
+                    down = False
+                elif p.rect.top < self.rect.top:
+                    up = False
+                    down = True
+                else:
+                    up = False
+                    down = False
+
+            if self.path[0].x < self.path[1].x:
+                right = True
+                left = False
+            elif self.path[1].x < self.path[0].x:
+                right = False
+                left = True
+            else:
+                if self.rect.left < p.rect.left:
+                    right = True
+                    left = False
+                elif p.rect.left < self.rect.left:
+                    right = False
+                    left = True
+                else:
+                    right = False
+                    left = False
+        else:
+            if p.rect.top < self.rect.top:
+                up = True
+                down = False
+            elif p.rect.top < self.rect.top:
                 up = False
                 down = True
             else:
                 up = False
                 down = False
-
-            if self.path[0].y < self.path[1].y:
+            if self.rect.left < p.rect.left:
                 right = True
                 left = False
-            elif self.path[0].y > self.path[1].y:
+            elif p.rect.left < self.rect.left:
                 right = False
                 left = True
             else:
                 right = False
                 left = False
-        else:
-            up = False
-            down = False
-            right = False
-            left = False
 
         # print("---------------------------------")
         # for c in path:
@@ -178,10 +207,10 @@ class Enemy(Entity):
 
         if self.onStairs:
             self.vel_y = 0
-            if up: self.vel_y = -self.level_loaded.VELOCITY_MOVEMENT
-            if down: self.vel_y = self.level_loaded.VELOCITY_MOVEMENT
+            if up: self.vel_y = -self.level_loaded.ENEMY_VELOCITY_MOVEMENT
+            if down: self.vel_y = self.level_loaded.ENEMY_VELOCITY_MOVEMENT
         if self.onBar and down:
-            self.vel_y = self.level_loaded.VELOCITY_MOVEMENT
+            self.vel_y = self.level_loaded.ENEMY_VELOCITY_MOVEMENT
         if self.onGround and up:
             # only jump if on the ground
             self.jump_sound.play()
@@ -200,9 +229,9 @@ class Enemy(Entity):
                 self.vel_y = self.level_loaded.VELOCITY_FALL_MAX
 
         if left:
-            self.vel_x = -self.level_loaded.VELOCITY_MOVEMENT
+            self.vel_x = -self.level_loaded.ENEMY_VELOCITY_MOVEMENT
         if right:
-            self.vel_x = self.level_loaded.VELOCITY_MOVEMENT
+            self.vel_x = self.level_loaded.ENEMY_VELOCITY_MOVEMENT
         if not(left or right):
             self.vel_x = 0
         if not(up or down) and self.onStairs and self.onBar:
