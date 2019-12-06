@@ -135,14 +135,14 @@ def test_02():
                 layout.screen_game.blit(text, (x_pos, y_pos))
                 i_cell = i_cell + 1
 
-        # for i_row in range(0, level_loaded.TILE_Y_NUM):
-        #     for i_col in range(0, level_loaded.TILE_X_NUM):
-        #         str_text = str(int(level_loaded.level_matrix[i_row][i_col]))
-        #         # str_text = str(i_row) + "-" + str(i_col)
-        #         x_pos = int(level_loaded.offset_w + (i_col + 0.3) * level_loaded.TILE_X)
-        #         y_pos = int(level_loaded.offset_h + (i_row + 0.3) * level_loaded.TILE_Y)
-        #         text = my_font_42.render(str_text, 8, (237, 210, 36))
-        #         layout.screen_game.blit(text, (x_pos, y_pos))
+        for i_row in range(0, level_loaded.TILE_Y_NUM):
+            for i_col in range(0, level_loaded.TILE_X_NUM):
+                str_text = str(int(level_loaded.level_matrix[i_row][i_col]))
+                # str_text = str(i_row) + "-" + str(i_col)
+                x_pos = int(level_loaded.offset_w + (i_col + 0.3) * level_loaded.TILE_X)
+                y_pos = int(level_loaded.offset_h + (i_row + 0.3) * level_loaded.TILE_Y)
+                text = my_font_42.render(str_text, 8, (237, 0, 36))
+                layout.screen_game.blit(text, (x_pos, y_pos))
 
         layout.update()
         # layout.update(player_p2.rect, zoom=8.0)

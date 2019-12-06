@@ -132,10 +132,10 @@ class Enemy(Entity):
 
         self.target_player = p
 
-        x_end = int((p.rect.left - self.level_loaded.offset_h) / self.level_loaded.TILE_X)
-        y_end = 1+int((p.rect.top - self.level_loaded.offset_w) / self.level_loaded.TILE_Y)
-        x_ini = int((self.rect.left - self.level_loaded.offset_h) / self.level_loaded.TILE_X)
-        y_ini = 1+int((self.rect.top - self.level_loaded.offset_w) / self.level_loaded.TILE_Y)
+        x_end = int((p.rect.left - self.level_loaded.offset_w) / self.level_loaded.TILE_X)
+        y_end = int((p.rect.top - self.level_loaded.offset_h) / self.level_loaded.TILE_Y)
+        x_ini = int((self.rect.left - self.level_loaded.offset_w) / self.level_loaded.TILE_X)
+        y_ini = int((self.rect.top - self.level_loaded.offset_h) / self.level_loaded.TILE_Y)
 
         maze = self.level_loaded.level_matrix
         maze_dijkstra = Dijkstra(maze)
@@ -154,10 +154,10 @@ class Enemy(Entity):
                 up = False
                 down = True
             else:
-                if p.rect.top < self.rect.top:
+                if self.level_loaded.offset_h + self.path[0].y * self.level_loaded.TILE_Y < self.rect.top:
                     up = True
                     down = False
-                elif p.rect.top < self.rect.top:
+                elif self.rect.top < self.level_loaded.offset_h + self.path[0].y * self.level_loaded.TILE_Y:
                     up = False
                     down = True
                 else:
@@ -171,17 +171,17 @@ class Enemy(Entity):
                 right = False
                 left = True
             else:
-                if self.rect.left < p.rect.left:
+                if self.rect.left < self.level_loaded.offset_w + self.path[0].x * self.level_loaded.TILE_X:
                     right = True
                     left = False
-                elif p.rect.left < self.rect.left:
+                elif self.level_loaded.offset_w + self.path[0].x * self.level_loaded.TILE_X < self.rect.left:
                     right = False
                     left = True
                 else:
                     right = False
                     left = False
         else:
-            if p.rect.top < self.rect.top:
+            if self.rect.top < p.rect.top:
                 up = True
                 down = False
             elif p.rect.top < self.rect.top:
